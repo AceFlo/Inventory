@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -7,8 +7,6 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    email = Column(String, unique=True, index=True)
-    contact_no = Column(String)
 
 
 class Product(Base):
@@ -30,7 +28,7 @@ class Customer(Base):
 class StockIn(Base):
     __tablename__ = "stock_in"
     id = Column(Integer, primary_key=True, index=True)
-    stock_in_date = Column(DateTime)
+    stock_in_date = Column(Date)
     quantity = Column(Integer)
     product_id = Column(Integer, ForeignKey("products.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
@@ -50,28 +48,39 @@ class RemainingStock(Base):
     product = relationship("Product")
 
 
+class Sale(Base):
+    __tablename__ = "sales"
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(Date)
+    total_amount = Column(Float)
+
+
+class SaleItem(Base):
+    __tablename__ = "sale_items"
+    id = Column(Integer, primary_key=True, index=True)
+    sale_id = Column(Integer, ForeignKey("sales.id"))
+    product_id = Column(Integer, ForeignKey("products.id"))
+    quantity = Column(Integer)
+
+    sale = relationship("Sale")
+    product = relationship("Product")
+
+
 class Invoice(Base):
     __tablename__ = "invoices"
     id = Column(Integer, primary_key=True, index=True)
-    invoice_date = Column(DateTime)
-    total_amount = Column(Float)
-    gst = Column(Float)
-    discount = Column(Float)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    customer_id = Column(Integer, ForeignKey("customers.id"))
+    sale_id = Column(Integer, ForeignKey("sales.id"))
+    amount = Column(Float)
+    date = Column(Date)
 
-    user = relationship("User")
-    customer = relationship("Customer")
+    sale = relationship("Sale")
 
 
 class Payment(Base):
     __tablename__ = "payments"
     id = Column(Integer, primary_key=True, index=True)
     amount = Column(Float)
-    payment_date = Column(DateTime)
-    profit_loss = Column(Float)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    customer_id = Column(Integer, ForeignKey("customers.id"))
+    date = Column(Date)
+    invoice_id = Column(Integer, ForeignKey("invoices.id"))
 
-    user = relationship("User")
-    customer = relationship("Customer")
+    invoice = relationship("Invoice")
